@@ -1,0 +1,38 @@
+# Based on https://stackoverflow.com/a/58468828
+
+name: Check Twemoji release
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  release_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout twemoji-release.txt file
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_KEY }}
+          ref: refs/heads/main
+          sparse-checkout: twemoji-release.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Fetch Twemoji latest release version
+        run: |
+          curl -s -L 'https://api.github.com/repos/jdecked/twemoji/releases/latest' | \
+          jq -r '.tag_name' > twemoji-release.txt
+
+      - name: Check if it is a new release
+        id: git-check
+        run: echo modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true") >> $GITHUB_OUTPUT
+        
+      - name: Commit latest release version
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add twemoji-release.txt
+          git commit -m "Update twemoji-release.txt ($(cat twemoji-release.txt))"
+          git push

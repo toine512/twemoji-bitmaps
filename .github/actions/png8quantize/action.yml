@@ -1,0 +1,35 @@
+name: Convert to indexed PNG
+author: toine512
+description: Quantize a PNG truecolor + alpha to PNG 8 bin indexed using pngquant quality 94
+branding:
+  icon: image
+  color: yellow
+
+inputs:
+  source_dir:
+    description: Directory containing source files
+    required: true
+  output_dir:
+    description: Output directory (created if it doesn't exist)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create output directory
+      run: mkdir -p -v '${{ inputs.output_dir }}'
+      shell: bash
+
+    - name: Copy source files
+      run: cp -f -P --reflink=auto '${{ inputs.source_dir }}'/* '${{ inputs.output_dir }}'
+      shell: bash
+
+    - name: Install pngquant
+      run: which pngquant || (sudo apt-get update -y && sudo apt-get install pngquant -y)
+      shell: bash
+
+    - name: Convert files
+      working-directory: ${{ inputs.output_dir }}
+      run:  pngquant --ext=.png --force --nofs --quality 0-94 --speed 1 *.png
+      # No great size improvement after --speed 3 but it's fast anyway
+      shell: bash

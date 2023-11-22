@@ -1,0 +1,66 @@
+name: Render bitmaps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - twemoji-release.txt
+  workflow_dispatch:
+
+jobs:
+  convert_svg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_KEY }}
+          ref: refs/heads/main
+          path: repo
+
+      - run: echo "TWEMOJI-RELEASE=$(cat repo/twemoji-release.txt)" >> $GITHUB_ENV
+
+      - name: Checkout Twemoji repo
+        uses: actions/checkout@v4
+        with:
+          repository: jdecked/twemoji
+          ref: refs/tags/${{ env.TWEMOJI-RELEASE }}
+          path: twemoji
+          sparse-checkout: assets/svg
+
+      - name: Speedup APT package installation
+        uses: abbbi/github-actions-tune@v1
+
+      - name: Convert SVGs to 128x128 PNG32
+        id: conv-128x128
+        uses: ./repo/.github/actions/svg2png32
+        with:
+          svg_dir: twemoji/assets/svg
+          output_path: repo
+
+      - name: Generate 128x128 PNG8
+        uses: ./repo/.github/actions/png8quantize
+        with:
+          source_dir: ${{ steps.conv-128x128.outputs.png_dir }}
+          output_dir: repo/128x128_png8
+
+      - name: Commit
+        working-directory: repo
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -am "Generate Twemoji ${{ env.TWEMOJI-RELEASE }}"
+          git tag -f "${{ env.TWEMOJI-RELEASE }}"
+          git push origin
+          git push --force origin "refs/tags/${{ env.TWEMOJI-RELEASE }}":"refs/tags/${{ env.TWEMOJI-RELEASE }}"
+
+      - name: Create a release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          7z a -tzip "128x128_PNG32.zip" "./${{ steps.conv-128x128.outputs.png_dir }}/*"
+          7z a -tzip "128x128_PNG8.zip" "./repo/128x128_png8/*"
+          gh release delete "${{ env.TWEMOJI-RELEASE }}" -y --repo "$GITHUB_REPOSITORY" || true
+          gh release create "${{ env.TWEMOJI-RELEASE }}" "128x128_PNG32.zip#128x128 PNG32" "128x128_PNG8.zip#128x128 PNG8" --repo "$GITHUB_REPOSITORY" --title "Twemoji ${{ env.TWEMOJI-RELEASE }}" --notes "Release notes: https://github.com/jdecked/twemoji/releases/tag/${{ env.TWEMOJI-RELEASE }}"

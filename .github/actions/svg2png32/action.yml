@@ -1,0 +1,57 @@
+name: SVG to PNG32
+author: toine512
+description: Convert SVG files in a directory to PNG 8 bit RGBA using rsvg-convert, then optimises with optipng level 2
+# -o 6 gives negligible improvement and that's it
+branding:
+  icon: image
+  color: white
+
+inputs:
+  svg_dir:
+    description: Directory containing SVG files to convert
+    required: true
+  output_path:
+    description: Output path (a directory is created)
+    required: true
+  w:
+    description: Rendered image width
+    required: false
+    default: 128
+  h:
+    description: Rendered image height
+    required: false
+    default: 128
+
+outputs:
+  png_dir:
+    description: Output directory
+    value: ${{ steps.gen-out-dir.outputs.out_dir }}
+
+runs:
+  using: composite
+  steps:
+    - id: gen-out-dir
+      run: echo 'out_dir=${{ inputs.output_path }}/${{ inputs.w }}x${{ inputs.h }}_png32' >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Create output directory
+      run: mkdir -p -v '${{ steps.gen-out-dir.outputs.out_dir }}'
+      shell: bash
+
+    - name: Install rsvg-convert and optipng
+      run: which rsvg-convert optipng || (sudo apt-get update -y && sudo apt-get install librsvg2-bin optipng -y)
+      shell: bash
+
+    - name: Convert files
+      # Thanks https://unix.stackexchange.com/a/452637
+      run: find -P '${{ inputs.svg_dir }}' -maxdepth 1 -name *.svg -type f -exec sh -c 'rsvg-convert -f png -o "${1%.svg}.png" -b none -w ${{ inputs.w }} -h ${{ inputs.h }} -a "$1"' sh {} \;
+      shell: bash
+
+    - name: Move to destination
+      run: mv '${{ inputs.svg_dir }}'/*.png '${{ steps.gen-out-dir.outputs.out_dir }}'
+      shell: bash
+      
+    - name: Run optipng
+      working-directory: ${{ steps.gen-out-dir.outputs.out_dir }}
+      run: optipng -quiet -o 2 -i 0 -nc -strip all *png
+      shell: bash
