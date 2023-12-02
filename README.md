@@ -1,6 +1,6 @@
 # Bitmap renders of Twemoji
 
-Automatic renders of [Twemoji](https://github.com/jdecked/twemoji) SVG sources using GitHub Actions.
+Automated renders of [Twemoji](https://github.com/jdecked/twemoji) SVG sources using GitHub Actions.
 
 ## Available renders
 ### Downloads
