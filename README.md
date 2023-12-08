@@ -1,6 +1,7 @@
 # Bitmap renders of Twemoji
 
-Automated renders of [Twemoji](https://github.com/jdecked/twemoji) SVG sources using GitHub Actions.
+Automated PNG renders of [Twemoji](https://github.com/jdecked/twemoji) SVG sources powered by GitHub Actions. \
+Twemoji repository is checked for a new release every day at 11:00 UTC.
 
 ## Available renders
 ### Downloads
@@ -33,5 +34,5 @@ Sources are the `assets/svg` directory taken from latest release tag of the `mai
 
 ## Licensing
 
-Twemoji graphics are licensed under [Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/). \
+Twemoji graphics are licensed under [Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/). \
 Refer to https://github.com/jdecked/twemoji for more information about authors.
