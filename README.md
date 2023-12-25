@@ -1,6 +1,6 @@
 # Bitmap renders of Twemoji
 
-Automated PNG renders of [Twemoji](https://github.com/jdecked/twemoji) SVG sources powered by GitHub Actions. \
+Automated render of [Twemoji](https://github.com/jdecked/twemoji) SVG sources as PNG images, powered by GitHub Actions. \
 Twemoji repository is checked for a new release every day at 11:00 UTC.
 
 ## Available renders
