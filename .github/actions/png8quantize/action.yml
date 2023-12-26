@@ -1,6 +1,6 @@
 name: Convert to indexed PNG
 author: toine512
-description: Quantize a PNG truecolor + alpha to PNG 8 bin indexed using pngquant quality 94
+description: Quantize a PNG truecolor + alpha to PNG 8 bit indexed using pngquant quality 94
 branding:
   icon: image
   color: yellow
