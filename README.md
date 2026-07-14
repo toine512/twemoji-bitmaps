@@ -7,7 +7,7 @@ Twemoji repository is checked for a new release every day at 11:00 UTC.
 ### Downloads
 
 Each target is zipped as part of the [release](https://github.com/toine512/twemoji-bitmaps/releases). \
-You can also pick individual files browsing the `main` branch.
+You can also pick individual files by browsing the `main` branch.
 
 Files can be distributed through jsDelivr. \
 Latest: \
